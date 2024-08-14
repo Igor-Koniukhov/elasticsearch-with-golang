@@ -8,9 +8,23 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esutil"
+	"log"
 	"strconv"
 	"sync/atomic"
+	"time"
 )
+
+func handleError(ctx context.Context, err error) {
+	log.Printf("Error indexing document: %v", err)
+}
+
+func logFlush(ctx context.Context) context.Context {
+	start := time.Now()
+	defer func() {
+		log.Printf("Flush took %s", time.Since(start))
+	}()
+	return ctx
+}
 
 func IndexMoviesAsDocuments(ctx context.Context) {
 
@@ -18,9 +32,11 @@ func IndexMoviesAsDocuments(ctx context.Context) {
 	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
 
 	bulkIndexer, err := esutil.NewBulkIndexer(esutil.BulkIndexerConfig{
-		Index:      "movies",
-		Client:     client,
-		NumWorkers: 5,
+		Index:        "movies",
+		Client:       client,
+		NumWorkers:   5,
+		OnError:      handleError,
+		OnFlushStart: logFlush,
 	})
 	if err != nil {
 		panic(err)
