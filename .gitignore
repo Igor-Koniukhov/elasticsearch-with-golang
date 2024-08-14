@@ -1,0 +1,16 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+elastic-cloud.auto.tfvars
+terraform.tfstate.backup
+terraform.tfstate
+.terraform.lock.hcl
+.terraform
+.vscode
+go.sum
+.idea
